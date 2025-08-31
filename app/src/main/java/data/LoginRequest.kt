@@ -1,4 +1,4 @@
-package data
+package com.aura.ui.data
 
 /**
  * Représente la requête d'authentification envoyée au serveur.

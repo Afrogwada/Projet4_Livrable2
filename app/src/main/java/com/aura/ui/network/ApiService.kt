@@ -1,0 +1,21 @@
+package com.aura.ui.network
+
+import com.aura.ui.data.LoginRequest
+import com.aura.ui.data.LoginResponse
+import retrofit2.http.Body
+import retrofit2.http.POST
+
+/**
+ * Interface Retrofit pour accéder aux endpoints de l'API.
+ */
+interface ApiService {
+
+    /**
+     * Endpoint POST pour la connexion de l'utilisateur.
+     *
+     * @param request Objet contenant l'identifiant et le mot de passe
+     * @return LoginResponse indiquant si l'accès est accordé
+     */
+    @POST("/login")
+    suspend fun login(@Body request: LoginRequest): LoginResponse
+}

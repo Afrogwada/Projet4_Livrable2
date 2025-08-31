@@ -1,6 +1,5 @@
-package data
+package com.aura.ui.data
 
-package com.aura.data
 
 /**
  * Représente la réponse du serveur après une tentative de connexion.

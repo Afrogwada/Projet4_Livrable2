@@ -4,6 +4,7 @@ import androidx.activity.viewModels
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.widget.addTextChangedListener
 import androidx.lifecycle.lifecycleScope
@@ -52,13 +53,39 @@ class LoginActivity : AppCompatActivity()
       loginViewModel.setPassword(text.toString())
     }
 
+    // Clic sur login
     login.setOnClickListener {
       loading.visibility = View.VISIBLE
+      loginViewModel.login()
 
-      val intent = Intent(this@LoginActivity, HomeActivity::class.java)
-      startActivity(intent)
+      // Observer le résultat du login
+      lifecycleScope.launch {
+        loginViewModel.loginResult.collectLatest { result ->
+          loading.visibility = View.GONE
+          if (result != null && result.granted) {
+            // Identifiants corrects → ouvrir Home
+            val intent = Intent(this@LoginActivity, HomeActivity::class.java)
+            startActivity(intent)
+            finish()
+          } else if (!loginViewModel.networkError.value && result != null){
+            // Message "Identifiants incorrects" seulement si pas d'erreur réseau
+            Toast.makeText(this@LoginActivity, "Identifiants incorrects", Toast.LENGTH_LONG).show()
+          }
+        }
+      }
 
-      finish()
+      // Observer les erreurs réseau
+      lifecycleScope.launch {
+        loginViewModel.networkError.collectLatest { hasError ->
+          if (hasError) {
+            Toast.makeText(
+              this@LoginActivity,
+              "Impossible de se connecter : vérifiez votre connexion internet",
+              Toast.LENGTH_LONG
+            ).show()
+          }
+        }
+      }
     }
   }
 
