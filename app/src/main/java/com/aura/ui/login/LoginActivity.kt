@@ -10,6 +10,7 @@ import androidx.core.widget.addTextChangedListener
 import androidx.lifecycle.lifecycleScope
 import com.aura.databinding.ActivityLoginBinding
 import com.aura.ui.home.HomeActivity
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
@@ -61,6 +62,7 @@ class LoginActivity : AppCompatActivity()
       // Observer le résultat du login
       lifecycleScope.launch {
         loginViewModel.loginResult.collectLatest { result ->
+          delay(10000L) // pour tester Manage the loading state on the login screen
           loading.visibility = View.GONE
           if (result != null && result.granted) {
             // Identifiants corrects → ouvrir Home
