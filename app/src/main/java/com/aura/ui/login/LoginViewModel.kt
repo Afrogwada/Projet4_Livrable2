@@ -1,5 +1,6 @@
 package com.aura.ui.login
 
+import com.aura.ui.Logger
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.aura.ui.data.LoginResponse
@@ -61,13 +62,17 @@ class LoginViewModel : ViewModel() {
             try {
                 val response = repository.login(identifier.value, password.value)
                 _loginResult.value = response
+                Logger.d(response.toString())
             } catch (e: IOException) {
                 // Erreur réseau (pas de connexion, timeout, etc.)
                 _networkError.value = true
                 _loginResult.value = LoginResponse(granted = false)
+                Logger.d("Erreur réseau (pas de connexion, timeout, etc.) ${e.message}")
             } catch (e: Exception) {
                 _loginResult.value = LoginResponse(granted = false)
+                Logger.d("Autre erreur")
             }
+
         }
     }
 
