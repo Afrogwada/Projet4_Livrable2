@@ -48,6 +48,16 @@ class HomeActivity : AppCompatActivity()
     }
   }
 
+  /**
+   * Gère l'appui sur le bouton de retour.
+   * Appelle finish() pour fermer la HomeActivity et quitter l'application,
+   * au lieu de naviguer vers l'activité précédente (LoginActivity).
+   */
+  override fun onBackPressed() {
+    // Termine l'activité actuelle, ce qui ferme l'application si c'est la seule activité.
+    finish()
+  }
+
   override fun onCreateOptionsMenu(menu: Menu?): Boolean
   {
     menuInflater.inflate(R.menu.home_menu, menu)

@@ -9,6 +9,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.widget.addTextChangedListener
 import androidx.lifecycle.lifecycleScope
 import com.aura.databinding.ActivityLoginBinding
+import com.aura.ui.Logger
 import com.aura.ui.home.HomeActivity
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
@@ -62,10 +63,12 @@ class LoginActivity : AppCompatActivity()
       // Observer le résultat du login
       lifecycleScope.launch {
         loginViewModel.loginResult.collectLatest { result ->
-          delay(10000L) // pour tester Manage the loading state on the login screen
+          //delay(10000L) // pour tester Manage the loading state on the login screen
+          Logger.d("valeur de result: ${result.toString()}")
           loading.visibility = View.GONE
           if (result != null && result.granted) {
             // Identifiants corrects → ouvrir Home
+            Logger.d("Identifiants corrects → ouvrir Home")
             val intent = Intent(this@LoginActivity, HomeActivity::class.java)
             startActivity(intent)
             finish()

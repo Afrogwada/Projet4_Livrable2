@@ -13,7 +13,6 @@ object Logger {
         val methodName = element.methodName
 
         return "($fileName:$lineNumber) -> $methodName : $message"
-
     }
     fun d( message: String) {
         Log.d("LogPerso", buildMessage(message))

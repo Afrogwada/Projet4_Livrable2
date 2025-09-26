@@ -33,9 +33,14 @@ class LoginViewModel : ViewModel() {
     fun setPassword(newPassword: String){
         password.value = newPassword
     }
+
+    fun setLoginGranted(granted: Boolean){
+        _loginResult.value = _loginResult.value?.copy(granted = granted)
+    }
+
     /** Résultat de la tentative de connexion */
     private val _loginResult = MutableStateFlow<LoginResponse?>(null)
-    val loginResult: StateFlow<LoginResponse?> = _loginResult
+    val loginResult: StateFlow<LoginResponse?> = _loginResult.asStateFlow()
 
     /** Indique si une erreur réseau est survenue */
     private val _networkError = MutableStateFlow(false)
@@ -58,21 +63,28 @@ class LoginViewModel : ViewModel() {
      * Gère les exceptions réseau.
      */
     fun login() {
+
         viewModelScope.launch {
+
             try {
+                Logger.d("set login user id ${identifier.value}")
+                Logger.d("set login user pass ${password.value}")
                 val response = repository.login(identifier.value, password.value)
-                _loginResult.value = response
+                _loginResult.value = LoginResponse(granted = response.granted)
                 Logger.d(response.toString())
+                Logger.d("response.granted = ${response.granted}")
+                Logger.d("_loginResult.value to string = ${_loginResult.value.toString()}")
+                Logger.d("_loginResult.value = ${_loginResult.value}")
             } catch (e: IOException) {
                 // Erreur réseau (pas de connexion, timeout, etc.)
                 _networkError.value = true
-                _loginResult.value = LoginResponse(granted = false)
+                setLoginGranted(false)
                 Logger.d("Erreur réseau (pas de connexion, timeout, etc.) ${e.message}")
             } catch (e: Exception) {
-                _loginResult.value = LoginResponse(granted = false)
+                setLoginGranted(false)
+                Logger.d("Erreur réseau Login ${e.message}")
                 Logger.d("Autre erreur")
             }
-
         }
     }
 
