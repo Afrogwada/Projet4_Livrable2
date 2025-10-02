@@ -5,8 +5,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.aura.ui.data.LoginResponse
 import com.aura.ui.repository.LoginRepository
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import java.io.IOException
@@ -16,35 +14,36 @@ import java.io.IOException
  * Il gère la logique de connexion et expose l'état de l'UI via un StateFlow.
  * Inclut la gestion des erreurs réseau.
  */
-
 class LoginViewModel : ViewModel() {
 
     private val repository = LoginRepository()
+
+    // ---------------------------------------------------------------------------------------------
+    // GESTION DU CONTENEUR D'ÉTAT (LoginUiState)
+    // ---------------------------------------------------------------------------------------------
+
+    /** L'état modifiable (interne) de l'interface utilisateur de connexion. */
+    private val _uiState = MutableStateFlow(LoginUiState())
+    /** L'état exposé (observable) de l'interface utilisateur de connexion. */
+    val uiState: StateFlow<LoginUiState> = _uiState.asStateFlow()
 
     /** Champ identifier saisi par l'utilisateur */
     private val identifier : MutableStateFlow<String> = MutableStateFlow("")
 
     fun setIdentifier(newIdentifier: String){
         identifier.value = newIdentifier
+        // Optionnel : Réinitialiser l'état de succès/erreur lorsque l'utilisateur modifie les champs
+        _uiState.update { it.copy(isSuccess = null, errorMessage = null) }
     }
+
     /** Champ password saisi par l'utilisateur */
     private val password : MutableStateFlow<String> = MutableStateFlow("")
 
     fun setPassword(newPassword: String){
         password.value = newPassword
+        // Optionnel : Réinitialiser l'état de succès/erreur lorsque l'utilisateur modifie les champs
+        _uiState.update { it.copy(isSuccess = null, errorMessage = null) }
     }
-
-    fun setLoginGranted(granted: Boolean){
-        _loginResult.value = _loginResult.value?.copy(granted = granted)
-    }
-
-    /** Résultat de la tentative de connexion */
-    private val _loginResult = MutableStateFlow<LoginResponse?>(null)
-    val loginResult: StateFlow<LoginResponse?> = _loginResult.asStateFlow()
-
-    /** Indique si une erreur réseau est survenue */
-    private val _networkError = MutableStateFlow(false)
-    val networkError: StateFlow<Boolean> = _networkError
 
     /**
      * Flow qui indique si le bouton login doit être activé.
@@ -60,32 +59,53 @@ class LoginViewModel : ViewModel() {
 
     /**
      * Lance la connexion via le repository.
-     * Gère les exceptions réseau.
+     * Met à jour le [LoginUiState] pour gérer le chargement, le succès et l'erreur.
      */
     fun login() {
+        // 1. Début du chargement
+        _uiState.update { it.copy(isLoading = true, isSuccess = null, errorMessage = null) }
 
         viewModelScope.launch {
-
             try {
-                Logger.d("set login user id ${identifier.value}")
-                Logger.d("set login user pass ${password.value}")
+                Logger.d("Tentative de connexion pour user id ${identifier.value}")
                 val response = repository.login(identifier.value, password.value)
-                _loginResult.value = LoginResponse(granted = response.granted)
-                Logger.d(response.toString())
-                Logger.d("response.granted = ${response.granted}")
-                Logger.d("_loginResult.value to string = ${_loginResult.value.toString()}")
-                Logger.d("_loginResult.value = ${_loginResult.value}")
+
+                // 2. Connexion réussie/échouée (du point de vue du serveur)
+                if (response.granted) {
+                    _uiState.update { it.copy(isLoading = false, isSuccess = true) }
+                } else {
+                    _uiState.update {
+                        it.copy(
+                            isLoading = false,
+                            isSuccess = false,
+                            errorMessage = "Identifiants incorrects" // Message d'erreur spécifique à la logique
+                        )
+                    }
+                }
+
             } catch (e: IOException) {
-                // Erreur réseau (pas de connexion, timeout, etc.)
-                _networkError.value = true
-                setLoginGranted(false)
-                Logger.d("Erreur réseau (pas de connexion, timeout, etc.) ${e.message}")
+                // 3. Erreur réseau (pas de connexion, timeout, etc.)
+                Logger.d("Erreur réseau: ${e.message}")
+                _uiState.update {
+                    it.copy(
+                        isLoading = false,
+                        isSuccess = false,
+                        errorMessage = "Impossible de se connecter : vérifiez votre connexion internet"
+                    )
+                }
             } catch (e: Exception) {
-                setLoginGranted(false)
-                Logger.d("Erreur réseau Login ${e.message}")
-                Logger.d("Autre erreur")
+                // 4. Autre erreur
+                Logger.d("Autre erreur de connexion: ${e.message}")
+                _uiState.update {
+                    it.copy(
+                        isLoading = false,
+                        isSuccess = false,
+                        errorMessage = "Une erreur inattendue est survenue."
+                    )
+                }
             }
         }
     }
+
 
 }

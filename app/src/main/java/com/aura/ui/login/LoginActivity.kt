@@ -11,7 +11,6 @@ import androidx.lifecycle.lifecycleScope
 import com.aura.databinding.ActivityLoginBinding
 import com.aura.ui.Logger
 import com.aura.ui.home.HomeActivity
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
@@ -35,11 +34,10 @@ class LoginActivity : AppCompatActivity()
     binding = ActivityLoginBinding.inflate(layoutInflater)
     setContentView(binding.root)
 
-
-
-
     val login = binding.login
     val loading = binding.loading
+    val identifier = binding.identifier
+    val password = binding.password
 
     // Observer le flow isLoginEnabled pour activer/désactiver le bouton
     lifecycleScope.launch {
@@ -47,51 +45,48 @@ class LoginActivity : AppCompatActivity()
         login.isEnabled = enabled
       }
     }
+
     // Observer les champs et mettre à jour le ViewModel
-    binding.identifier.addTextChangedListener { text ->
+    identifier.addTextChangedListener { text ->
       loginViewModel.setIdentifier(text.toString())
     }
-    binding.password.addTextChangedListener { text ->
+    password.addTextChangedListener { text ->
       loginViewModel.setPassword(text.toString())
     }
 
     // Clic sur login
     login.setOnClickListener {
-      loading.visibility = View.VISIBLE
       loginViewModel.login()
+    }
 
-      // Observer le résultat du login
-      lifecycleScope.launch {
-        loginViewModel.loginResult.collectLatest { result ->
-          //delay(10000L) // pour tester Manage the loading state on the login screen
-          Logger.d("valeur de result: ${result.toString()}")
-          loading.visibility = View.GONE
-          if (result != null && result.granted) {
-            // Identifiants corrects → ouvrir Home
-            Logger.d("Identifiants corrects → ouvrir Home")
-            val intent = Intent(this@LoginActivity, HomeActivity::class.java)
-            startActivity(intent)
-            finish()
-          } else if (!loginViewModel.networkError.value && result != null){
-            // Message "Identifiants incorrects" seulement si pas d'erreur réseau
-            Toast.makeText(this@LoginActivity, "Identifiants incorrects", Toast.LENGTH_LONG).show()
-          }
+    // ---------------------------------------------------------------------------------------------
+    // NOUVEL OBSERVATEUR UNIQUE DU CONTENEUR D'ÉTAT (uiState)
+    // ---------------------------------------------------------------------------------------------
+    lifecycleScope.launch {
+      loginViewModel.uiState.collectLatest { uiState ->
+        Logger.d("Nouvel état UI : $uiState")
+
+        // Gérer l'état de chargement
+        loading.visibility = if (uiState.isLoading) View.VISIBLE else View.GONE
+        login.isEnabled = !uiState.isLoading // Désactiver le bouton pendant le chargement
+
+        //  Gérer le succès
+        if (uiState.isSuccess == true) {
+          // Connexion réussie → ouvrir Home
+          Logger.d("Connexion réussie → ouvrir Home")
+          val intent = Intent(this@LoginActivity, HomeActivity::class.java)
+          startActivity(intent)
+          finish() //Ferme le LoginActivity, Cela empêche l’utilisateur de revenir en arrière sur l’écran de login en appuyant sur la touche Back.
         }
-      }
-
-      // Observer les erreurs réseau
-      lifecycleScope.launch {
-        loginViewModel.networkError.collectLatest { hasError ->
-          if (hasError) {
-            Toast.makeText(
-              this@LoginActivity,
-              "Impossible de se connecter : vérifiez votre connexion internet",
-              Toast.LENGTH_LONG
-            ).show()
-          }
+        // 3. Gérer l'échec (avec ou sans message d'erreur)
+        else if (uiState.isSuccess == false && uiState.errorMessage != null) {
+          // Afficher le message d'erreur provenant du ViewModel
+          Toast.makeText(this@LoginActivity, uiState.errorMessage, Toast.LENGTH_LONG).show()
         }
       }
     }
-  }
+    // ---------------------------------------------------------------------------------------------
 
+    // L'ancien bloc d'observateurs de loginResult et networkError est supprimé
+  }
 }
