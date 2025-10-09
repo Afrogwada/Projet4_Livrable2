@@ -6,7 +6,7 @@ import com.aura.ui.data.LoginResponse
 import com.aura.ui.network.RetrofitInstance
 
 /**
- * Repository qui encapsule l'accès à l'API pour le login.
+ * Repository qui encapsule l'accès à l'API pour le login
  */
 class LoginRepository {
 
@@ -19,6 +19,6 @@ class LoginRepository {
      */
     suspend fun login(id: String, password: String): LoginResponse {
         val request = LoginRequest(id, password)
-        return RetrofitInstance.api.login(request)
+        return RetrofitInstance.loginApi.login(request)
     }
 }

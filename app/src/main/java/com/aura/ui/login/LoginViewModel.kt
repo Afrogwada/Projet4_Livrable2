@@ -3,7 +3,7 @@ package com.aura.ui.login
 import com.aura.ui.Logger
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.aura.ui.data.LoginResponse
+import com.aura.R
 import com.aura.ui.repository.LoginRepository
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -33,7 +33,7 @@ class LoginViewModel : ViewModel() {
     fun setIdentifier(newIdentifier: String){
         identifier.value = newIdentifier
         // Optionnel : Réinitialiser l'état de succès/erreur lorsque l'utilisateur modifie les champs
-        _uiState.update { it.copy(isSuccess = null, errorMessage = null) }
+        _uiState.update { it.copy(isSuccess = null, error = null) }
     }
 
     /** Champ password saisi par l'utilisateur */
@@ -42,7 +42,7 @@ class LoginViewModel : ViewModel() {
     fun setPassword(newPassword: String){
         password.value = newPassword
         // Optionnel : Réinitialiser l'état de succès/erreur lorsque l'utilisateur modifie les champs
-        _uiState.update { it.copy(isSuccess = null, errorMessage = null) }
+        _uiState.update { it.copy(isSuccess = null, error = null) }
     }
 
     /**
@@ -63,7 +63,7 @@ class LoginViewModel : ViewModel() {
      */
     fun login() {
         // 1. Début du chargement
-        _uiState.update { it.copy(isLoading = true, isSuccess = null, errorMessage = null) }
+        _uiState.update { it.copy(isLoading = true, isSuccess = null, error = null,userId = null) }
 
         viewModelScope.launch {
             try {
@@ -72,13 +72,13 @@ class LoginViewModel : ViewModel() {
 
                 // 2. Connexion réussie/échouée (du point de vue du serveur)
                 if (response.granted) {
-                    _uiState.update { it.copy(isLoading = false, isSuccess = true) }
+                    _uiState.update { it.copy(isLoading = false, isSuccess = true, userId = identifier.value) }
                 } else {
                     _uiState.update {
                         it.copy(
                             isLoading = false,
                             isSuccess = false,
-                            errorMessage = "Identifiants incorrects" // Message d'erreur spécifique à la logique
+                            error = R.string.error_bad_id // Message d'erreur spécifique à la logique
                         )
                     }
                 }
@@ -90,7 +90,7 @@ class LoginViewModel : ViewModel() {
                     it.copy(
                         isLoading = false,
                         isSuccess = false,
-                        errorMessage = "Impossible de se connecter : vérifiez votre connexion internet"
+                        error = R.string.error_network
                     )
                 }
             } catch (e: Exception) {
@@ -100,7 +100,7 @@ class LoginViewModel : ViewModel() {
                     it.copy(
                         isLoading = false,
                         isSuccess = false,
-                        errorMessage = "Une erreur inattendue est survenue."
+                        error = R.string.error_generic
                     )
                 }
             }

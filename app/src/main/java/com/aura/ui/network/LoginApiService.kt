@@ -8,7 +8,7 @@ import retrofit2.http.POST
 /**
  * Interface Retrofit pour accéder aux endpoints de l'API.
  */
-interface ApiService {
+interface LoginApiService {
 
     /**
      * Endpoint POST pour la connexion de l'utilisateur.
@@ -18,4 +18,5 @@ interface ApiService {
      */
     @POST("/login")
     suspend fun login(@Body request: LoginRequest): LoginResponse
+
 }

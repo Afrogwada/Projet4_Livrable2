@@ -16,11 +16,18 @@ object RetrofitInstance {
         .add(KotlinJsonAdapterFactory())
         .build()
 
-    val api: ApiService by lazy {
+    val loginApi: LoginApiService by lazy {
         Retrofit.Builder()
             .baseUrl(BASE_URL)
             .addConverterFactory(MoshiConverterFactory.create(moshi))
             .build()
-            .create(ApiService::class.java)
+            .create(LoginApiService::class.java)
+    }
+    val getAccounts: GetAccountsApiService by lazy {
+        Retrofit.Builder()
+            .baseUrl(BASE_URL)
+            .addConverterFactory(MoshiConverterFactory.create(moshi))
+            .build()
+            .create(GetAccountsApiService::class.java)
     }
 }

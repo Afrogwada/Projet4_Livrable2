@@ -74,19 +74,21 @@ class LoginActivity : AppCompatActivity()
         if (uiState.isSuccess == true) {
           // Connexion réussie → ouvrir Home
           Logger.d("Connexion réussie → ouvrir Home")
-          val intent = Intent(this@LoginActivity, HomeActivity::class.java)
+          val intent = Intent(this@LoginActivity, HomeActivity::class.java).apply{
+            // Ajouter l'ID utilisateur comme extra
+            putExtra(HomeActivity.EXTRA_USER_ID, uiState.userId)
+          }
           startActivity(intent)
           finish() //Ferme le LoginActivity, Cela empêche l’utilisateur de revenir en arrière sur l’écran de login en appuyant sur la touche Back.
         }
         // 3. Gérer l'échec (avec ou sans message d'erreur)
-        else if (uiState.isSuccess == false && uiState.errorMessage != null) {
+        else if (uiState.isSuccess == false && uiState.error != null) {
           // Afficher le message d'erreur provenant du ViewModel
-          Toast.makeText(this@LoginActivity, uiState.errorMessage, Toast.LENGTH_LONG).show()
+          Toast.makeText(this@LoginActivity, getString(uiState.error), Toast.LENGTH_LONG).show()
         }
       }
     }
     // ---------------------------------------------------------------------------------------------
 
-    // L'ancien bloc d'observateurs de loginResult et networkError est supprimé
   }
 }

@@ -12,4 +12,10 @@
   <string name="prompt_recipient">Destinataire</string>
   <string name="prompt_amount">Montant</string>
   <string name="action_transfer">Faire le virement</string>
+
+  <string name="error_network">Erreur de connexion. Veuillez vérifier votre réseau.</string>
+  <string name="error_user_not_found">Identifiant utilisateur non trouvé. (ID : %s)</string>
+  <string name="error_bad_id">Identifiants incorrects</string>
+  <string name="error_generic">Une erreur inattendue est survenue.</string>
+  <string name="balance_loading">Chargement du solde...</string>
 </resources>

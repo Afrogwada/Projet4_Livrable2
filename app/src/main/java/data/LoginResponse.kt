@@ -7,6 +7,7 @@ package com.aura.ui.data
  * @property granted Indique si l'accès est accordé
  */
 data class LoginResponse(
-    val granted: Boolean
+    val granted: Boolean,
+    val userId: String?
 )
 
