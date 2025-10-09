@@ -69,7 +69,7 @@ class HomeActivity : AppCompatActivity()
     }
 
 
-    binding.transfer.setOnClickListener {
+    transfer.setOnClickListener {
       startTransferActivityForResult.launch(Intent(this@HomeActivity, TransferActivity::class.java))
     }
 
