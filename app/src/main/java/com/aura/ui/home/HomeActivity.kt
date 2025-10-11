@@ -1,5 +1,6 @@
 package com.aura.ui.home
 
+import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.view.Menu
@@ -43,7 +44,10 @@ class HomeActivity : AppCompatActivity()
    */
   private val startTransferActivityForResult =
     registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result: ActivityResult ->
-      //TODO
+      // Recharger les comptes après un virement réussi pour mettre à jour le solde
+      if (result.resultCode == Activity.RESULT_OK) {
+        homeViewModel.currentUserId?.let { homeViewModel.loadUserAccounts(it) }
+      }
     }
 
   override fun onCreate(savedInstanceState: Bundle?) {
@@ -52,12 +56,18 @@ class HomeActivity : AppCompatActivity()
     binding = ActivityHomeBinding.inflate(layoutInflater)
     setContentView(binding.root)
 
-    // Récupération de l'ID utilisateur de l'Intent (transmis par LoginActivity)
-    val userId = intent.getStringExtra(EXTRA_USER_ID)
-
     val balance = binding.balance
     val transfer = binding.transfer
     val loading = binding.loading
+
+    // Récupération de l'ID utilisateur de l'Intent (transmis par LoginActivity)
+    val userId = intent.getStringExtra(EXTRA_USER_ID)
+    if (userId != null) {
+      homeViewModel.loadUserAccounts(userId)
+      // Solde est initialisé à vide, il sera rempli par l'observation
+      balance.text = ""
+    }
+
 
     if (!userId.isNullOrBlank()) {
       // Déclenchement de l'appel API dans le ViewModel
@@ -70,7 +80,14 @@ class HomeActivity : AppCompatActivity()
 
 
     transfer.setOnClickListener {
-      startTransferActivityForResult.launch(Intent(this@HomeActivity, TransferActivity::class.java))
+      if (userId != null) {
+        val intent = Intent(this@HomeActivity, TransferActivity::class.java)
+        // 💡 Passer l'ID de l'expéditeur au TransferActivity
+        intent.putExtra(TransferActivity.EXTRA_USER_ID, userId) // Assumer l'existence de la constante dans TransferActivity
+        startTransferActivityForResult.launch(intent)
+      } else {
+        Toast.makeText(this, "Erreur: ID utilisateur manquant.", Toast.LENGTH_SHORT).show()
+      }
     }
 
     /**

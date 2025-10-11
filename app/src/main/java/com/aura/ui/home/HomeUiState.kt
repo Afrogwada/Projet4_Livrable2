@@ -1,5 +1,7 @@
 package com.aura.ui.home
 
+import androidx.annotation.StringRes
+
 /**
  * Modélise les différents états de l'écran d'accueil.
  *
@@ -10,5 +12,5 @@ package com.aura.ui.home
 data class HomeUiState(
     val isLoading: Boolean = false,
     val balance: Double? = null,
-    val error: Int? = null // Utilise l'ID de la ressource String pour l'erreur
+    @StringRes val error: Int? = null // Utilise l'ID de la ressource String pour l'erreur
 )

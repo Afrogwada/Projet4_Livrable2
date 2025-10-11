@@ -1,5 +1,7 @@
 package com.aura.ui.login
 
+import androidx.annotation.StringRes
+
 /**
  * Représente l'état de l'interface utilisateur pour l'écran de connexion.
  *
@@ -11,6 +13,6 @@ package com.aura.ui.login
 data class LoginUiState(
     val isLoading: Boolean = false,
     val isSuccess: Boolean? = null,
-    val error: Int? = null,
+    @StringRes val error: Int? = null,
     val userId: String? = null
 )

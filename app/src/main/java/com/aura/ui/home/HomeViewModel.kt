@@ -3,7 +3,7 @@ package com.aura.ui.home
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.aura.R
-import com.aura.ui.repository.GetAccountsRepository
+import com.aura.ui.data.repository.GetAccountsRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow

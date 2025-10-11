@@ -18,4 +18,6 @@
   <string name="error_bad_id">Identifiants incorrects</string>
   <string name="error_generic">Une erreur inattendue est survenue.</string>
   <string name="balance_loading">Chargement du solde...</string>
+  <string name="amount_invalid">Montant invalide. Veuillez entrer un nombre positif.</string>
+  <string name="transfert_failure">Échec du virement. Vérifiez les détails du destinataire ou le solde.</string>
 </resources>

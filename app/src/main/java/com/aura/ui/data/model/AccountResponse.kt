@@ -1,4 +1,4 @@
-package com.aura.ui.data
+package com.aura.ui.data.model
 
 import com.squareup.moshi.Json
 

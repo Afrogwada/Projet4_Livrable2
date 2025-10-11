@@ -1,9 +1,9 @@
-package com.aura.ui.repository
+package com.aura.ui.data.repository
 
 
-import com.aura.ui.data.LoginRequest
-import com.aura.ui.data.LoginResponse
-import com.aura.ui.network.RetrofitInstance
+import com.aura.ui.data.model.LoginRequest
+import com.aura.ui.data.model.LoginResponse
+import com.aura.ui.data.network.RetrofitInstance
 
 /**
  * Repository qui encapsule l'accès à l'API pour le login

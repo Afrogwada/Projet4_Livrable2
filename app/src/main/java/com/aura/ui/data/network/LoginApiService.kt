@@ -1,7 +1,7 @@
-package com.aura.ui.network
+package com.aura.ui.data.network
 
-import com.aura.ui.data.LoginRequest
-import com.aura.ui.data.LoginResponse
+import com.aura.ui.data.model.LoginRequest
+import com.aura.ui.data.model.LoginResponse
 import retrofit2.http.Body
 import retrofit2.http.POST
 

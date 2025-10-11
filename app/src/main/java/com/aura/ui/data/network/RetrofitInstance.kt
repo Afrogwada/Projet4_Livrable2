@@ -1,4 +1,4 @@
-package com.aura.ui.network
+package com.aura.ui.data.network
 
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
@@ -29,5 +29,12 @@ object RetrofitInstance {
             .addConverterFactory(MoshiConverterFactory.create(moshi))
             .build()
             .create(GetAccountsApiService::class.java)
+    }
+    val transferApi: TransferApiService by lazy {
+        Retrofit.Builder()
+            .baseUrl(BASE_URL)
+            .addConverterFactory(MoshiConverterFactory.create(moshi))
+            .build()
+            .create(TransferApiService::class.java)
     }
 }

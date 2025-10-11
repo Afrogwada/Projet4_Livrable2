@@ -1,7 +1,7 @@
-package com.aura.ui.repository
+package com.aura.ui.data.repository
 
-import com.aura.ui.data.AccountResponse
-import com.aura.ui.network.RetrofitInstance
+import com.aura.ui.data.model.AccountResponse
+import com.aura.ui.data.network.RetrofitInstance
 
 /**
  * Repository qui encapsule l'accès à l'API pour les comptes.
