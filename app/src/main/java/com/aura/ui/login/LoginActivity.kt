@@ -68,7 +68,7 @@ class LoginActivity : AppCompatActivity()
 
         // Gérer l'état de chargement
         loading.visibility = if (uiState.isLoading) View.VISIBLE else View.GONE
-        login.isEnabled = !uiState.isLoading // Désactiver le bouton pendant le chargement
+        //login.isEnabled = !uiState.isLoading // Désactiver le bouton pendant le chargement
 
         //  Gérer le succès
         if (uiState.isSuccess == true) {

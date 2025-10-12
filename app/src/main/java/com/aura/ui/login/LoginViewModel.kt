@@ -49,7 +49,7 @@ class LoginViewModel(private val repository: LoginRepository = LoginRepository()
      * Le bouton est activé uniquement si identifier et password ne sont pas vides.
      */
     val isLoginEnabled: StateFlow<Boolean> = combine(identifier, password) { id, pwd ->
-        id.isNotBlank() && pwd.isNotBlank()
+        id.isNotBlank() && pwd.isNotBlank() && !_uiState.value.isLoading
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(),

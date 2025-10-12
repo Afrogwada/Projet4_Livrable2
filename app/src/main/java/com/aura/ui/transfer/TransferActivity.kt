@@ -84,7 +84,7 @@ class TransferActivity : AppCompatActivity() {
       transferViewModel.uiState.collectLatest { uiState ->
         // Gérer l'état de chargement
         loading.visibility = if (uiState.isTransferring) View.VISIBLE else View.GONE
-        transfer.isEnabled = !uiState.isTransferring // Désactiver le bouton pendant le chargement
+        //transfer.isEnabled = !uiState.isTransferring // Désactiver le bouton pendant le chargement
 
         if (uiState.transferSuccess == true) {
           // Transfert réussie → retour à Home

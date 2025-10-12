@@ -36,7 +36,7 @@ class TransferViewModel(
      */
     val isTransferButtonEnabled: StateFlow<Boolean> = combine(recipient, amount) { rec, amt ->
         // Critère d'acceptation 1 : Les deux champs doivent être remplis (non vides)
-        rec.isNotBlank() && amt.isNotBlank()
+        rec.isNotBlank() && amt.isNotBlank() && !_uiState.value.isTransferring
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(),
