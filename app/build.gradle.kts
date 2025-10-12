@@ -55,22 +55,28 @@ dependencies {
   implementation("com.squareup.retrofit2:converter-moshi:2.9.0")
 
   // Coroutines (asynchrone)
-  implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
-  implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
+  val coroutines_version = "1.8.1"
+  //val coroutines_version = "1.7.3"
+  implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutines_version")
+  implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutines_version")
 
-  // Lifecycle (déjà ajouté mais je le répète au cas où)
-  implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.2")
 
   // Lifecycle & ViewModel KTX pour 'by viewModels()' et StateFlow
   implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.2")
   implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.6.2")
   implementation("androidx.activity:activity-ktx:1.10.1")
 
-  // Kotlin Coroutines pour Flow
-  implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
-
   // Tests
-  testImplementation("junit:junit:4.13.2")
-  androidTestImplementation("androidx.test.ext:junit:1.1.5")
-  androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
+// JUnit 5
+  testImplementation("org.junit.jupiter:junit-jupiter-api:5.10.2")
+  testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.10.2")
+  testImplementation("org.junit.jupiter:junit-jupiter-params:5.10.2")
+// Coroutines
+  testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:$coroutines_version")
+
+
+// MockK (pour le mocking)
+  testImplementation("io.mockk:mockk:1.13.10")
+
+
 }

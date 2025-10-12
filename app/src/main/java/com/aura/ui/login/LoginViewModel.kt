@@ -14,9 +14,8 @@ import java.io.IOException
  * Il gère la logique de connexion et expose l'état de l'UI via un StateFlow.
  * Inclut la gestion des erreurs réseau.
  */
-class LoginViewModel : ViewModel() {
+class LoginViewModel(private val repository: LoginRepository = LoginRepository()) : ViewModel() {
 
-    private val repository = LoginRepository()
 
     // ---------------------------------------------------------------------------------------------
     // GESTION DU CONTENEUR D'ÉTAT (LoginUiState)
@@ -67,7 +66,7 @@ class LoginViewModel : ViewModel() {
 
         viewModelScope.launch {
             try {
-                Logger.d("Tentative de connexion pour user id ${identifier.value}")
+                //Logger.d("Tentative de connexion pour user id ${identifier.value}")
                 val response = repository.login(identifier.value, password.value)
 
                 // 2. Connexion réussie/échouée (du point de vue du serveur)
@@ -85,7 +84,7 @@ class LoginViewModel : ViewModel() {
 
             } catch (e: IOException) {
                 // 3. Erreur réseau (pas de connexion, timeout, etc.)
-                Logger.d("Erreur réseau: ${e.message}")
+                //Logger.d("Erreur réseau: ${e.message}")
                 _uiState.update {
                     it.copy(
                         isLoading = false,
@@ -95,7 +94,7 @@ class LoginViewModel : ViewModel() {
                 }
             } catch (e: Exception) {
                 // 4. Autre erreur
-                Logger.d("Autre erreur de connexion: ${e.message}")
+                //Logger.d("Autre erreur de connexion: ${e.message}")
                 _uiState.update {
                     it.copy(
                         isLoading = false,
