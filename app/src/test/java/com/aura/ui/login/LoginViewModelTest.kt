@@ -18,7 +18,7 @@ import org.junit.Assert.fail
 import org.junit.Rule
 
 class LoginViewModelTest {
-    // NOUVELLE RÈGLE : Assure que le Dispatcher.Main est disponible pour les tests coroutines
+    // Assure que le Dispatcher.Main est disponible pour les tests coroutines
     @get:Rule
     val mainDispatcherRule = MainDispatcherRule() // Nécessite la classe MainDispatcherRule
 
@@ -122,6 +122,15 @@ class LoginViewModelTest {
             successExpected=false,
             userIdExpected=null,
             errorExpected=R.string.error_network
+        )
+    }
+    @Test
+    fun other_error()= runTest{
+        performLogin(
+            mockResponse = { coEvery { mockRepository.login(any(), any()) } throws RuntimeException("Unexpected error") },
+            successExpected=false,
+            userIdExpected=null,
+            errorExpected=R.string.error_generic
         )
     }
 

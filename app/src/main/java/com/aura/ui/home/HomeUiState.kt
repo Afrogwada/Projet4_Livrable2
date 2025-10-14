@@ -12,5 +12,7 @@ import androidx.annotation.StringRes
 data class HomeUiState(
     val isLoading: Boolean = false,
     val balance: Double? = null,
+    val isSuccess: Boolean? = null,
+    val userId: String? = null,
     @StringRes val error: Int? = null // Utilise l'ID de la ressource String pour l'erreur
 )

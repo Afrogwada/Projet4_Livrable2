@@ -58,6 +58,8 @@ class HomeViewModel(
                 _uiState.update {
                     it.copy(
                         isLoading = false,
+                        isSuccess = true,
+                        userId =userId,
                         balance = mainAccount?.balance // Affiche le solde du compte principal
                     )
                 }
@@ -68,16 +70,16 @@ class HomeViewModel(
                     404 -> R.string.error_user_not_found // Utilisateur incorrect
                     else -> R.string.error_generic // Autres erreurs HTTP
                 }
-                _uiState.update { it.copy(isLoading = false, error = errorMessageRes) }
+                _uiState.update { it.copy(isLoading = false, isSuccess = false, error = errorMessageRes) }
                 e.printStackTrace()
 
             } catch (e: IOException) {
                 // 5. Gestion des Erreurs Réseau (Ex: Pas de connexion Internet, Timeout)
-                _uiState.update { it.copy(isLoading = false, error = R.string.error_network) }
+                _uiState.update { it.copy(isLoading = false, isSuccess = false, error = R.string.error_network) }
                 e.printStackTrace()
             } catch (e: Exception) {
                 // 6. Gestion des Autres Erreurs
-                _uiState.update { it.copy(isLoading = false, error = R.string.error_generic) }
+                _uiState.update { it.copy(isLoading = false, isSuccess = false, error = R.string.error_generic) }
                 e.printStackTrace()
             }
         }
