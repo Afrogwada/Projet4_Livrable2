@@ -58,15 +58,15 @@ class TransferViewModel(
         amount.value = newAmount
     }
 
-    fun performTransfer() {
+    fun transfer() {
         val senderId = _uiState.value.senderId
         val recipientId = recipient.value
         val amountValue = amount.value
-        Logger.d("Nouveau transfert de $senderId vers $recipientId")
+        //Logger.d("Nouveau transfert de $senderId vers $recipientId")
 
         // Validation du montant avant l'appel API
         val amountAsDouble = amountValue.toDoubleOrNull()
-        Logger.d("pour un montant de  $amountAsDouble")
+        //Logger.d("pour un montant de  $amountAsDouble")
         if (amountAsDouble == null || amountAsDouble <= 0.0) {
             _uiState.update {
                 it.copy(
@@ -93,7 +93,7 @@ class TransferViewModel(
                     recipient = recipientId,
                     amount = amountAsDouble
                 )
-                Logger.d("début du transfert")
+                //Logger.d("début du transfert")
                 val response = repository.performTransfer(request)
 
                 // 2. Virement réussi/échoué (du point de vue du serveur)
@@ -104,7 +104,7 @@ class TransferViewModel(
                             transferSuccess = true
                         )
                     }
-                    Logger.d("transfert ok")
+                    //Logger.d("transfert ok")
                 } else {
                     _uiState.update {
                         it.copy(

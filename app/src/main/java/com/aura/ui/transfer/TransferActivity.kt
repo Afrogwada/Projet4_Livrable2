@@ -10,9 +10,6 @@ import com.aura.databinding.ActivityTransferBinding
 import androidx.activity.viewModels
 import androidx.core.widget.doAfterTextChanged
 import androidx.lifecycle.lifecycleScope
-import com.aura.ui.Logger
-import com.aura.ui.home.HomeActivity
-import com.aura.ui.home.HomeActivity.Companion
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
@@ -56,7 +53,7 @@ class TransferActivity : AppCompatActivity() {
 
     transfer.setOnClickListener {
       loading.visibility = View.VISIBLE
-      transferViewModel.performTransfer()
+      transferViewModel.transfer()
 
     }
     recipient.doAfterTextChanged { editable ->
