@@ -18,7 +18,7 @@ import kotlinx.coroutines.flow.update
 
 class TransferViewModel(
     private val repository: TransferRepository = TransferRepository()
-):ViewModel() {
+) : ViewModel() {
 
     // ---------------------------------------------------------------------------------------------
     // Propriétés et StateFlows Internes
@@ -78,14 +78,15 @@ class TransferViewModel(
     /**
      * Crée le StateFlow pour l'activation du bouton de virement.
      */
-    private fun createTransferButtonEnabledFlow(): StateFlow<Boolean> = combine(recipient, amount, _uiState) { rec, amt, state ->
-        // Le bouton est activé seulement si les deux champs sont remplis et qu'aucun transfert n'est en cours
-        rec.isNotBlank() && amt.isNotBlank() && !state.isTransferring
-    }.stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(),
-        initialValue = false
-    )
+    private fun createTransferButtonEnabledFlow(): StateFlow<Boolean> =
+        combine(recipient, amount, _uiState) { rec, amt, state ->
+            // Le bouton est activé seulement si les deux champs sont remplis et qu'aucun transfert n'est en cours
+            rec.isNotBlank() && amt.isNotBlank() && !state.isTransferring
+        }.stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(),
+            initialValue = false
+        )
 
     /**
      * Vérifie la validité du montant avant de lancer le processus de virement.
@@ -135,7 +136,8 @@ class TransferViewModel(
      */
     private suspend fun performTransferRequest() {
         val ui = _uiState.value
-        val amountValue = amount.value.toDoubleOrNull() ?: throw IllegalStateException("Amount validation failed")
+        val amountValue =
+            amount.value.toDoubleOrNull() ?: throw IllegalStateException("Amount validation failed")
 
         val request = TransferRequest(
             sender = ui.senderId,

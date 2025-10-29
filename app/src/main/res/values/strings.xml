@@ -1,24 +1,24 @@
 <resources>
-  <string name="app_name">Aura</string>
+    <string name="app_name">Aura</string>
 
-  <string name="prompt_identifier">Identifiant</string>
-  <string name="prompt_password">Mot de passe</string>
-  <string name="action_sign_in">Connexion</string>
+    <string name="prompt_identifier">Identifiant</string>
+    <string name="prompt_password">Mot de passe</string>
+    <string name="action_sign_in">Connexion</string>
 
-  <string name="balance">Balance :</string>
-  <string name="disconnect">Déconnexion</string>
-  <string name="bank_transfer">Faire un virement</string>
+    <string name="balance">Balance :</string>
+    <string name="disconnect">Déconnexion</string>
+    <string name="bank_transfer">Faire un virement</string>
 
-  <string name="prompt_recipient">Destinataire</string>
-  <string name="prompt_amount">Montant</string>
-  <string name="action_transfer">Faire le virement</string>
+    <string name="prompt_recipient">Destinataire</string>
+    <string name="prompt_amount">Montant</string>
+    <string name="action_transfer">Faire le virement</string>
 
-  <string name="error_network">Erreur de connexion. Veuillez vérifier votre réseau.</string>
-  <string name="error_user_not_found">Identifiant utilisateur non trouvé. (ID : %s)</string>
-  <string name="error_bad_id">Identifiants incorrects</string>
-  <string name="error_generic">Une erreur inattendue est survenue.</string>
-  <string name="balance_loading">Chargement du solde...</string>
-  <string name="amount_invalid">Montant invalide. Veuillez entrer un nombre positif.</string>
-  <string name="transfert_failure">Échec du virement. Vérifiez les détails du destinataire ou le solde.</string>
-  <string name="transfer_success">Virement ok.</string>
+    <string name="error_network">Erreur de connexion. Veuillez vérifier votre réseau.</string>
+    <string name="error_user_not_found">Identifiant utilisateur non trouvé. (ID : %s)</string>
+    <string name="error_bad_id">Identifiants incorrects</string>
+    <string name="error_generic">Une erreur inattendue est survenue.</string>
+    <string name="balance_loading">Chargement du solde...</string>
+    <string name="amount_invalid">Montant invalide. Veuillez entrer un nombre positif.</string>
+    <string name="transfert_failure">Échec du virement. Vérifiez les détails du destinataire ou le solde.</string>
+    <string name="transfer_success">Virement ok.</string>
 </resources>

@@ -21,8 +21,10 @@ class LoginViewModel(private val repository: LoginRepository = LoginRepository()
 
     /** L'état modifiable (interne) de l'interface utilisateur de connexion. */
     private val _uiState = MutableStateFlow(LoginUiState())
+
     /** Champ identifier saisi par l'utilisateur */
     private val identifier: MutableStateFlow<String> = MutableStateFlow("")
+
     /** Champ password saisi par l'utilisateur */
     private val password: MutableStateFlow<String> = MutableStateFlow("")
 
@@ -77,13 +79,14 @@ class LoginViewModel(private val repository: LoginRepository = LoginRepository()
     /**
      * Crée le StateFlow pour l'activation du bouton.
      */
-    private fun createLoginEnabledFlow(): StateFlow<Boolean> = combine(identifier, password, _uiState) { id, pwd, state ->
-        id.isNotBlank() && pwd.isNotBlank() && !state.isLoading
-    }.stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(5000), // Ajout d'un timeout pour plus de robustesse
-        initialValue = false
-    )
+    private fun createLoginEnabledFlow(): StateFlow<Boolean> =
+        combine(identifier, password, _uiState) { id, pwd, state ->
+            id.isNotBlank() && pwd.isNotBlank() && !state.isLoading
+        }.stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000), // Ajout d'un timeout pour plus de robustesse
+            initialValue = false
+        )
 
     /**
      * Réinitialise l'état de succès/erreur lorsque l'utilisateur modifie les champs.
@@ -107,7 +110,13 @@ class LoginViewModel(private val repository: LoginRepository = LoginRepository()
 
         if (response.granted) {
             // Connexion réussie (du point de vue du serveur)
-            _uiState.update { it.copy(isLoading = false, isSuccess = true, userId = identifier.value) }
+            _uiState.update {
+                it.copy(
+                    isLoading = false,
+                    isSuccess = true,
+                    userId = identifier.value
+                )
+            }
         } else {
             // Connexion échouée (identifiants incorrects)
             _uiState.update {

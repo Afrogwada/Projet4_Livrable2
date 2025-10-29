@@ -35,8 +35,8 @@ class TransferViewModelTest {
     // L'objet à tester
     private lateinit var viewModel: TransferViewModel
 
-    private val testRecipient="Test_Recipient"
-    private val testAmount= "10.10"
+    private val testRecipient = "Test_Recipient"
+    private val testAmount = "10.10"
     private val testSender = "Test_Sender"
 
 
@@ -52,7 +52,12 @@ class TransferViewModelTest {
     }
 
     // Tester l'Activation du Bouton Login (isLoginEnabled)
-    private suspend fun checkTransferButton(recipient: String = testRecipient, amount: String = testAmount, expected: Boolean, message: String) {
+    private suspend fun checkTransferButton(
+        recipient: String = testRecipient,
+        amount: String = testAmount,
+        expected: Boolean,
+        message: String
+    ) {
         // ARRANGE : Simuler la saisie des données initiales
         viewModel.setRecipient(recipient)
         viewModel.setAmount(amount)
@@ -62,14 +67,14 @@ class TransferViewModelTest {
 
         // ASSERT : Vérifier l'état du bouton Login
         if (expected) {
-            assertTrue(message,finalState)
+            assertTrue(message, finalState)
         } else {
-            assertFalse(message,finalState)
+            assertFalse(message, finalState)
         }
     }
 
     @Test
-    fun isTransferEnabled_true()= runTest{
+    fun isTransferEnabled_true() = runTest {
         checkTransferButton(
             recipient = "test_user",
             amount = "test_amount",
@@ -79,7 +84,7 @@ class TransferViewModelTest {
     }
 
     @Test
-    fun isTransferEnabled_false_amount_missing()= runTest{
+    fun isTransferEnabled_false_amount_missing() = runTest {
         checkTransferButton(
             recipient = "test_user",
             amount = "",
@@ -89,7 +94,7 @@ class TransferViewModelTest {
     }
 
     @Test
-    fun isTransferEnabled_false_recipient_missing()= runTest{
+    fun isTransferEnabled_false_recipient_missing() = runTest {
         checkTransferButton(
             recipient = "",
             amount = "test_amount",
@@ -102,10 +107,9 @@ class TransferViewModelTest {
     private suspend fun testTransfer(
         mockResponse: suspend () -> Unit,
         successExpected: Boolean,
-        errorExpected: Int?=null,
+        errorExpected: Int? = null,
         verifyCall: Boolean = true
-    )
-    {
+    ) {
         // ARRANGE : Simuler la saisie des données initiales
         mockResponse()
         viewModel.setSenderId(testSender)
@@ -115,12 +119,16 @@ class TransferViewModelTest {
         val finalState = viewModel.uiState.first()
 
         // ASSERT : Vérifier l'état final
-        assertFalse( "isTransferring doit être false après transfer()",finalState.isTransferring)
-        assertEquals("L'état de succès du transfert n'est pas correct", successExpected, finalState.transferSuccess)
+        assertFalse("isTransferring doit être false après transfer()", finalState.isTransferring)
+        assertEquals(
+            "L'état de succès du transfert n'est pas correct",
+            successExpected,
+            finalState.transferSuccess
+        )
 
         if (errorExpected != null) {
             assertTrue(
-                "le message d'erreur devrait être : "+errorExpected,
+                "le message d'erreur devrait être : " + errorExpected,
                 finalState.error == errorExpected
             )
         } else {
@@ -148,9 +156,13 @@ class TransferViewModelTest {
     }
 
     @Test
-    fun transfer_succes()= runTest {
+    fun transfer_succes() = runTest {
         testTransfer(
-            mockResponse = {coEvery { mockRepository.performTransfer(any()) } returns TransferResponse(result = true) },
+            mockResponse = {
+                coEvery { mockRepository.performTransfer(any()) } returns TransferResponse(
+                    result = true
+                )
+            },
             successExpected = true,
             errorExpected = null
         )
@@ -158,16 +170,20 @@ class TransferViewModelTest {
     }
 
     @Test
-    fun transfert_failed_server_error()= runTest {
+    fun transfert_failed_server_error() = runTest {
         testTransfer(
-            mockResponse = {coEvery { mockRepository.performTransfer(any()) } returns TransferResponse(result = false) },
+            mockResponse = {
+                coEvery { mockRepository.performTransfer(any()) } returns TransferResponse(
+                    result = false
+                )
+            },
             successExpected = false,
             errorExpected = R.string.transfert_failure // Attendre l'erreur d'échec de transfert
         )
     }
 
     @Test
-    fun transfer_invalid_amount_zero()= runTest {
+    fun transfer_invalid_amount_zero() = runTest {
         viewModel.setAmount("0.0")
         testTransfer(
             mockResponse = { /* Pas besoin de mock, la validation échoue avant */ },
@@ -178,7 +194,7 @@ class TransferViewModelTest {
     }
 
     @Test
-    fun transfer_invalid_amount_null()= runTest {
+    fun transfer_invalid_amount_null() = runTest {
         viewModel.setAmount("null")
         testTransfer(
             mockResponse = { /* Pas besoin de mock, la validation échoue avant */ },
@@ -189,17 +205,18 @@ class TransferViewModelTest {
     }
 
     @Test
-    fun transfer_network_error()= runTest{
+    fun transfer_network_error() = runTest {
         testTransfer(
-            mockResponse = { coEvery { mockRepository.performTransfer(any()) } throws IOException()},
+            mockResponse = { coEvery { mockRepository.performTransfer(any()) } throws IOException() },
             successExpected = false,
             errorExpected = R.string.error_network
         )
     }
+
     @Test
-    fun other_error()= runTest{
+    fun other_error() = runTest {
         testTransfer(
-            mockResponse = { coEvery {  mockRepository.performTransfer(any()) } throws Exception("Unknown Error")},
+            mockResponse = { coEvery { mockRepository.performTransfer(any()) } throws Exception("Unknown Error") },
             successExpected = false,
             errorExpected = R.string.error_generic
         )

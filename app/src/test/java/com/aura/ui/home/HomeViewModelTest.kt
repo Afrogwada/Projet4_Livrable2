@@ -23,7 +23,6 @@ import retrofit2.HttpException
 import retrofit2.Response
 
 
-
 class HomeViewModelTest {
     // Assure que le Dispatcher.Main est disponible pour les tests coroutines
     @get:Rule
@@ -48,11 +47,10 @@ class HomeViewModelTest {
     private suspend fun performLoadUserAccounts(
         mockResponse: suspend () -> Unit,
         successExpected: Boolean,
-        expectedBalance:Double=0.0,
-        testUserId:String = "test_user",
-        errorExpected: Int?=null
-    )
-    {
+        expectedBalance: Double = 0.0,
+        testUserId: String = "test_user",
+        errorExpected: Int? = null
+    ) {
         // ARRANGE  : Préparer les données et le mock
         mockResponse()
 
@@ -66,7 +64,10 @@ class HomeViewModelTest {
         assertFalse("isLoading doit être false après LoadUserAccounts", finalState.isLoading)
         assertEquals(successExpected, finalState.isSuccess)
         if (successExpected) {
-            assertTrue("La balance ne correspond pas à l'attendu",expectedBalance==finalState.balance)
+            assertTrue(
+                "La balance ne correspond pas à l'attendu",
+                expectedBalance == finalState.balance
+            )
             assertTrue(
                 "L'identifiant utilisateur n'a pas été mis à jour",
                 finalState.userId == testUserId
@@ -74,7 +75,7 @@ class HomeViewModelTest {
         }
         if (errorExpected != null) {
             assertTrue(
-                "le message d'erreur devrait être : "+errorExpected,
+                "le message d'erreur devrait être : " + errorExpected,
                 finalState.error == errorExpected
             )
         } else {
@@ -89,16 +90,18 @@ class HomeViewModelTest {
 
 
     }
+
     @Test
-    fun success_state()= runTest {
+    fun success_state() = runTest {
         val expectedBalance = 1500.00
         val testUserId = "test_user"
         performLoadUserAccounts(
             successExpected = true,
-            expectedBalance= expectedBalance,
+            expectedBalance = expectedBalance,
             testUserId = testUserId,
             errorExpected = null,
-            mockResponse = { coEvery { mockRepository.getAccounts(any()) } returns listOf(
+            mockResponse = {
+                coEvery { mockRepository.getAccounts(any()) } returns listOf(
                     AccountResponse(
                         id = testUserId,
                         balance = expectedBalance,
@@ -109,36 +112,42 @@ class HomeViewModelTest {
                         balance = 50.00,
                         isMain = false
                     )
-            ) }
+                )
+            }
         )
     }
 
     @Test
-    fun network_error()= runTest {
+    fun network_error() = runTest {
         performLoadUserAccounts(
             successExpected = false,
-            errorExpected=R.string.error_network,
-            mockResponse = {coEvery { mockRepository.getAccounts(any()) } throws IOException("No internet")}
+            errorExpected = R.string.error_network,
+            mockResponse = { coEvery { mockRepository.getAccounts(any()) } throws IOException("No internet") }
         )
     }
 
     @Test
-    fun id_error()= runTest {
-        val httpException404 = HttpException(Response.error<Any>(404, ResponseBody.create(MediaType.get("application/json"),"")))
+    fun id_error() = runTest {
+        val httpException404 = HttpException(
+            Response.error<Any>(
+                404,
+                ResponseBody.create(MediaType.get("application/json"), "")
+            )
+        )
         performLoadUserAccounts(
             successExpected = false,
-            testUserId="bad_Id",
-            errorExpected=R.string.error_user_not_found,
-            mockResponse = {coEvery { mockRepository.getAccounts(any()) } throws httpException404 }
+            testUserId = "bad_Id",
+            errorExpected = R.string.error_user_not_found,
+            mockResponse = { coEvery { mockRepository.getAccounts(any()) } throws httpException404 }
         )
     }
 
     @Test
-    fun other_error()= runTest {
+    fun other_error() = runTest {
         performLoadUserAccounts(
             successExpected = false,
-            errorExpected=R.string.error_generic,
-            mockResponse = {coEvery { mockRepository.getAccounts(any()) } throws RuntimeException("Unexpected error") }
+            errorExpected = R.string.error_generic,
+            mockResponse = { coEvery { mockRepository.getAccounts(any()) } throws RuntimeException("Unexpected error") }
         )
     }
 

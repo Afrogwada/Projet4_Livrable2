@@ -43,52 +43,51 @@ class LoginViewModelTest {
         mockResponse: suspend () -> Unit,
         successExpected: Boolean,
         userIdExpected: String? = null,
-        errorExpected: Int?=null
-        )
-        {
-            // ARRANGE
-            mockResponse()
-            viewModel.setIdentifier("test_user")
-            viewModel.setPassword("test_pwd")
+        errorExpected: Int? = null
+    ) {
+        // ARRANGE
+        mockResponse()
+        viewModel.setIdentifier("test_user")
+        viewModel.setPassword("test_pwd")
 
-            // ACT
-            viewModel.login()
-            val finalState = viewModel.uiState.first()
+        // ACT
+        viewModel.login()
+        val finalState = viewModel.uiState.first()
 
-            // ASSERT : Vérifier l'état final
-            assertFalse( "Le chargement devrait être terminé après login",finalState.isLoading)
-            assertEquals(successExpected, finalState.isSuccess)
-            if (userIdExpected != null) {
-                assertTrue(
-                    "L'identifiant utilisateur n'a pas été mis à jour",
-                    finalState.userId == userIdExpected
-                )
-            } else {
-                assertTrue(
-                    "L'identifiant utilisateur n'aurait pas dû être mis à jour",
-                    finalState.userId == userIdExpected
-                )
-            }
-            if (errorExpected != null) {
-                assertTrue(
-                    "le message d'erreur devrait être : "+errorExpected,
-                    finalState.error == errorExpected
-                )
-            } else {
-                assertTrue(
-                    "Il ne devrait pas y avoir de message d'erreur",
-                    finalState.error == errorExpected
-                )
-            }
-            try {
-                coVerify(exactly = 1) { mockRepository.login("test_user", "test_pwd") }
-            } catch (e: AssertionError){
-                fail("La fonction login() du repository n'a pas été appelée correctement : ${e.message}")
-            }
+        // ASSERT : Vérifier l'état final
+        assertFalse("Le chargement devrait être terminé après login", finalState.isLoading)
+        assertEquals(successExpected, finalState.isSuccess)
+        if (userIdExpected != null) {
+            assertTrue(
+                "L'identifiant utilisateur n'a pas été mis à jour",
+                finalState.userId == userIdExpected
+            )
+        } else {
+            assertTrue(
+                "L'identifiant utilisateur n'aurait pas dû être mis à jour",
+                finalState.userId == userIdExpected
+            )
         }
+        if (errorExpected != null) {
+            assertTrue(
+                "le message d'erreur devrait être : " + errorExpected,
+                finalState.error == errorExpected
+            )
+        } else {
+            assertTrue(
+                "Il ne devrait pas y avoir de message d'erreur",
+                finalState.error == errorExpected
+            )
+        }
+        try {
+            coVerify(exactly = 1) { mockRepository.login("test_user", "test_pwd") }
+        } catch (e: AssertionError) {
+            fail("La fonction login() du repository n'a pas été appelée correctement : ${e.message}")
+        }
+    }
 
     @Test
-    fun login_succes()= runTest {
+    fun login_succes() = runTest {
         performLogin(
             mockResponse = {
                 coEvery { mockRepository.login(any(), any()) } returns LoginResponse(
@@ -101,8 +100,9 @@ class LoginViewModelTest {
             errorExpected = null
         )
     }
+
     @Test
-    fun login_failed()= runTest {
+    fun login_failed() = runTest {
         performLogin(
             mockResponse = {
                 coEvery { mockRepository.login(any(), any()) } returns LoginResponse(
@@ -115,28 +115,46 @@ class LoginViewModelTest {
             errorExpected = R.string.error_bad_id
         )
     }
+
     @Test
-    fun login_network_error()= runTest{
+    fun login_network_error() = runTest {
         performLogin(
-            mockResponse = { coEvery { mockRepository.login(any(), any()) } throws IOException("No internet") },
-            successExpected=false,
-            userIdExpected=null,
-            errorExpected=R.string.error_network
+            mockResponse = {
+                coEvery {
+                    mockRepository.login(
+                        any(),
+                        any()
+                    )
+                } throws IOException("No internet")
+            },
+            successExpected = false,
+            userIdExpected = null,
+            errorExpected = R.string.error_network
         )
     }
+
     @Test
-    fun other_error()= runTest{
+    fun other_error() = runTest {
         performLogin(
-            mockResponse = { coEvery { mockRepository.login(any(), any()) } throws RuntimeException("Unexpected error") },
-            successExpected=false,
-            userIdExpected=null,
-            errorExpected=R.string.error_generic
+            mockResponse = {
+                coEvery { mockRepository.login(any(), any()) } throws RuntimeException(
+                    "Unexpected error"
+                )
+            },
+            successExpected = false,
+            userIdExpected = null,
+            errorExpected = R.string.error_generic
         )
     }
 
 
     // Tester l'Activation du Bouton Login (isLoginEnabled)
-    private suspend fun checkLoginButton(identifier: String, password: String, expected: Boolean, message: String) {
+    private suspend fun checkLoginButton(
+        identifier: String,
+        password: String,
+        expected: Boolean,
+        message: String
+    ) {
         // ARRANGE : Simuler la saisie des données initiales
         viewModel.setIdentifier(identifier)
         viewModel.setPassword(password)
@@ -146,13 +164,14 @@ class LoginViewModelTest {
 
         // ASSERT : Vérifier l'état du bouton Login
         if (expected) {
-            assertTrue(message,finalState)
+            assertTrue(message, finalState)
         } else {
-            assertFalse(message,finalState)
+            assertFalse(message, finalState)
         }
     }
+
     @Test
-    fun isLoginEnabled_true()= runTest{
+    fun isLoginEnabled_true() = runTest {
         checkLoginButton(
             identifier = "test_user",
             password = "test_pwd",
@@ -160,8 +179,9 @@ class LoginViewModelTest {
             message = "Le bouton de login devrait être activé car le mot de passe et l'identidiant sont présents"
         )
     }
+
     @Test
-    fun isLoginEnabled_false_password_missing()= runTest{
+    fun isLoginEnabled_false_password_missing() = runTest {
         checkLoginButton(
             identifier = "test_user",
             password = "",
@@ -169,8 +189,9 @@ class LoginViewModelTest {
             message = "Le bouton de login ne devrait pas être activé car le mot de passe est manquant"
         )
     }
+
     @Test
-    fun isLoginEnabled_false_identifier_missing()= runTest{
+    fun isLoginEnabled_false_identifier_missing() = runTest {
         checkLoginButton(
             identifier = "",
             password = "test_pwd",

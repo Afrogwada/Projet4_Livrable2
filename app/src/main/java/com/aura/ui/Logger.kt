@@ -3,7 +3,6 @@ package com.aura.ui
 import android.util.Log
 
 
-
 object Logger {
 
     private fun buildMessage(message: String): String {
@@ -14,7 +13,8 @@ object Logger {
 
         return "($fileName:$lineNumber) -> $methodName : $message"
     }
-    fun d( message: String) {
+
+    fun d(message: String) {
         Log.d("LogPerso", buildMessage(message))
     }
 }
