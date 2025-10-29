@@ -1,4 +1,4 @@
-package com.aura.ui.data.model
+package com.aura.data.model
 
 /**
  * Représente le corps de la requête POST /transfer.

@@ -30,65 +30,100 @@ class LoginActivity : AppCompatActivity()
   override fun onCreate(savedInstanceState: Bundle?)
   {
     super.onCreate(savedInstanceState)
+    setupBinding()
+    setupInputListeners()
+    setupLoginButton()
+    observeViewModel()
+  }
 
+  /**
+   * Configure le View Binding et définit le content view.
+   */
+  private fun setupBinding() {
     binding = ActivityLoginBinding.inflate(layoutInflater)
     setContentView(binding.root)
+  }
 
-    val login = binding.login
-    val loading = binding.loading
-    val identifier = binding.identifier
-    val password = binding.password
+  /**
+   * Met en place les écouteurs de texte pour les champs d'identifiant et de mot de passe.
+   */
+  private fun setupInputListeners() {
+    // Observer les champs et mettre à jour le ViewModel
+    binding.identifier.addTextChangedListener { text ->
+      loginViewModel.setIdentifier(text.toString())
+    }
+    binding.password.addTextChangedListener { text ->
+      loginViewModel.setPassword(text.toString())
+    }
+  }
 
+  /**
+   * Configure l'action du bouton de connexion.
+   */
+  private fun setupLoginButton() {
+    // Clic sur login
+    binding.login.setOnClickListener {
+      loginViewModel.login()
+    }
+  }
+
+  /**
+   * Démarre l'observation des LiveData/StateFlow du ViewModel.
+   */
+  private fun observeViewModel() {
     // Observer le flow isLoginEnabled pour activer/désactiver le bouton
     lifecycleScope.launch {
       loginViewModel.isLoginEnabled.collectLatest { enabled ->
-        login.isEnabled = enabled
+        binding.login.isEnabled = enabled
       }
     }
 
-    // Observer les champs et mettre à jour le ViewModel
-    identifier.addTextChangedListener { text ->
-      loginViewModel.setIdentifier(text.toString())
-    }
-    password.addTextChangedListener { text ->
-      loginViewModel.setPassword(text.toString())
-    }
-
-    // Clic sur login
-    login.setOnClickListener {
-      loginViewModel.login()
-    }
-
-    // ---------------------------------------------------------------------------------------------
     // NOUVEL OBSERVATEUR UNIQUE DU CONTENEUR D'ÉTAT (uiState)
-    // ---------------------------------------------------------------------------------------------
     lifecycleScope.launch {
       loginViewModel.uiState.collectLatest { uiState ->
         Logger.d("Nouvel état UI : $uiState")
-
-        // Gérer l'état de chargement
-        loading.visibility = if (uiState.isLoading) View.VISIBLE else View.GONE
-        //login.isEnabled = !uiState.isLoading // Désactiver le bouton pendant le chargement
-
-        //  Gérer le succès
-        if (uiState.isSuccess == true) {
-          // Connexion réussie → ouvrir Home
-          Logger.d("Connexion réussie → ouvrir Home")
-          val intent = Intent(this@LoginActivity, HomeActivity::class.java).apply{
-            // Ajouter l'ID utilisateur comme extra
-            putExtra(HomeActivity.EXTRA_USER_ID, uiState.userId)
-          }
-          startActivity(intent)
-          finish() //Ferme le LoginActivity, Cela empêche l’utilisateur de revenir en arrière sur l’écran de login en appuyant sur la touche Back.
-        }
-        // 3. Gérer l'échec (avec ou sans message d'erreur)
-        else if (uiState.isSuccess == false && uiState.error != null) {
-          // Afficher le message d'erreur provenant du ViewModel
-          Toast.makeText(this@LoginActivity, getString(uiState.error), Toast.LENGTH_LONG).show()
-        }
+        handleLoading(uiState.isLoading)
+        handleLoginResult(uiState)
       }
     }
-    // ---------------------------------------------------------------------------------------------
+  }
 
+  /**
+   * Gère la visibilité de la barre de chargement.
+   * @param isLoading L'état actuel de chargement.
+   */
+  private fun handleLoading(isLoading: Boolean) {
+    binding.loading.visibility = if (isLoading) View.VISIBLE else View.GONE
+  }
+
+  /**
+   * Gère le résultat de la tentative de connexion (succès ou échec).
+   * @param uiState L'état actuel de l'UI.
+   */
+  private fun handleLoginResult(uiState: LoginUiState) {
+    // Gérer le succès
+    if (uiState.isSuccess == true) {
+      // Connexion réussie → ouvrir Home
+      Logger.d("Connexion réussie → ouvrir Home")
+      navigateToHome(uiState.userId)
+    }
+    // Gérer l'échec (avec message d'erreur)
+    else if (uiState.isSuccess == false && uiState.error != null) {
+      // Afficher le message d'erreur provenant du ViewModel
+      Toast.makeText(this, getString(uiState.error), Toast.LENGTH_LONG).show()
+    }
+  }
+
+  /**
+   * Ouvre la HomeActivity et ferme la LoginActivity.
+   * @param userId L'ID de l'utilisateur connecté.
+   */
+  private fun navigateToHome(userId: String?) {
+    val intent = Intent(this, HomeActivity::class.java).apply{
+      // Ajouter l'ID utilisateur comme extra
+      putExtra(HomeActivity.EXTRA_USER_ID, userId)
+    }
+    startActivity(intent)
+    finish() // Ferme le LoginActivity pour empêcher l'utilisateur de revenir en arrière.
   }
 }

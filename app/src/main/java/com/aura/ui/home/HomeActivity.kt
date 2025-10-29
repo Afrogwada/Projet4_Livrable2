@@ -16,6 +16,7 @@ import com.aura.R
 import com.aura.databinding.ActivityHomeBinding
 import com.aura.ui.login.LoginActivity
 import androidx.lifecycle.lifecycleScope
+import com.aura.ui.model.formatBalance
 import com.aura.ui.transfer.TransferActivity
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -46,7 +47,7 @@ class HomeActivity : AppCompatActivity()
     registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result: ActivityResult ->
       // Recharger les comptes après un virement réussi pour mettre à jour le solde
       if (result.resultCode == Activity.RESULT_OK) {
-        homeViewModel.currentUserId?.let { homeViewModel.loadUserAccounts(it) }
+        homeViewModel.refresh()
       }
     }
 
@@ -62,16 +63,12 @@ class HomeActivity : AppCompatActivity()
 
     // Récupération de l'ID utilisateur de l'Intent (transmis par LoginActivity)
     val userId = intent.getStringExtra(EXTRA_USER_ID)
-    if (userId != null) {
-      homeViewModel.loadUserAccounts(userId)
-      // Solde est initialisé à vide, il sera rempli par l'observation
-      balance.text = ""
-    }
-
 
     if (!userId.isNullOrBlank()) {
       // Déclenchement de l'appel API dans le ViewModel
       homeViewModel.loadUserAccounts(userId)
+      // Solde est initialisé à vide, il sera rempli par l'observation
+      balance.text = ""
     } else {
       // Cas d'erreur : ID manquant (ex: redirection vers LoginActivity)
       startActivity(Intent(this@HomeActivity, LoginActivity::class.java))
@@ -119,7 +116,7 @@ class HomeActivity : AppCompatActivity()
 
         // 2. Gérer le solde (Succès)
         if (state.balance != null) {
-          balance.text = formatBalance(state.balance)
+          balance.text = state.balance.formatBalance()
           balance.visibility = View.VISIBLE
         }
 
@@ -131,7 +128,7 @@ class HomeActivity : AppCompatActivity()
           val errorMessage = when (state.error) {
             R.string.error_user_not_found -> getString(
               R.string.error_user_not_found,
-              homeViewModel.currentUserId
+              homeViewModel.uiState.value.userId
             )
 
             else -> getString(state.error)
@@ -141,13 +138,7 @@ class HomeActivity : AppCompatActivity()
       }
     }
   }
-    /**
-     * Formate le Double en format monétaire français.
-     */
-  private fun formatBalance(balance: Double): String {
-    val format = NumberFormat.getCurrencyInstance(Locale.FRANCE)
-    return format.format(balance)
-  }
+
 
 
 

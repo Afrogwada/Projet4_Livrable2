@@ -8,8 +8,8 @@ import java.io.IOException
 
 import com.aura.R
 import com.aura.ui.MainDispatcherRule
-import com.aura.ui.data.model.LoginResponse
-import com.aura.ui.data.repository.LoginRepository
+import com.aura.data.model.LoginResponse
+import com.aura.data.repository.LoginRepository
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Assert.assertFalse

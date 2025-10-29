@@ -3,7 +3,7 @@ package com.aura.ui.home
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.aura.R
-import com.aura.ui.data.repository.GetAccountsRepository
+import com.aura.data.repository.GetAccountsRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -26,30 +26,20 @@ class HomeViewModel(
     private val _uiState = MutableStateFlow(HomeUiState(isLoading = true))
     val uiState: StateFlow<HomeUiState> = _uiState.asStateFlow()
 
-    // L'ID utilisateur doit être récupéré après une authentification réussie.
-    // private set = lecture seule de l'extérieur
-    var currentUserId: String = ""
-        private set
-
-
     /**
      * Tente de charger les comptes et met à jour l'état de l'UI.
      * Gère les différents cas d'erreur.
      */
+    fun refresh(){
+        uiState.value.userId?.let { loadUserAccounts(it) }
+    }
     fun loadUserAccounts(userId: String) {
-        /*// Si l'ID est le même et qu'il y a déjà un solde, ne rien faire (optimisation)
-        if (this.currentUserId == userId && uiState.value.balance != null && !uiState.value.isLoading) {
-            return
-        }*/
-
-        this.currentUserId = userId
 
         viewModelScope.launch {
             // 1. État de Chargement (Loading)
             _uiState.update { it.copy(isLoading = true, error = null) }
 
             try {
-                //delay(5000L) pour tester le loading
                 // 2. Appel API (via le Repository)
                 val accounts = repository.getAccounts(userId)
                 val mainAccount = accounts.find { it.isMain }

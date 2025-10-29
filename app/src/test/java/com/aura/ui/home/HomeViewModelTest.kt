@@ -7,10 +7,10 @@ import kotlinx.coroutines.flow.first
 import java.io.IOException
 
 import com.aura.R
-import com.aura.ui.data.model.AccountResponse
+import com.aura.data.model.AccountResponse
 import com.aura.ui.MainDispatcherRule
 
-import com.aura.ui.data.repository.GetAccountsRepository
+import com.aura.data.repository.GetAccountsRepository
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Assert.assertFalse

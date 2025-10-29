@@ -1,6 +1,6 @@
-package com.aura.ui.data.network
+package com.aura.data.network
 
-import com.aura.ui.data.model.AccountResponse
+import com.aura.data.model.AccountResponse
 import retrofit2.http.GET
 import retrofit2.http.Path
 

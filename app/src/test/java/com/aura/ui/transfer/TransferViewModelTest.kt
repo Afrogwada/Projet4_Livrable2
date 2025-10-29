@@ -7,11 +7,11 @@ import kotlinx.coroutines.flow.first
 import java.io.IOException
 
 import com.aura.R
-import com.aura.ui.data.model.TransferResponse
-import com.aura.ui.data.model.TransferRequest
+import com.aura.data.model.TransferResponse
+import com.aura.data.model.TransferRequest
 import com.aura.ui.MainDispatcherRule
 
-import com.aura.ui.data.repository.TransferRepository
+import com.aura.data.repository.TransferRepository
 import com.aura.ui.transfer.TransferViewModel
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -150,7 +150,7 @@ class TransferViewModelTest {
     @Test
     fun transfer_succes()= runTest {
         testTransfer(
-            mockResponse = {coEvery { mockRepository.performTransfer(any()) } returns TransferResponse(result = true)},
+            mockResponse = {coEvery { mockRepository.performTransfer(any()) } returns TransferResponse(result = true) },
             successExpected = true,
             errorExpected = null
         )
@@ -160,7 +160,7 @@ class TransferViewModelTest {
     @Test
     fun transfert_failed_server_error()= runTest {
         testTransfer(
-            mockResponse = {coEvery { mockRepository.performTransfer(any()) } returns TransferResponse(result = false)},
+            mockResponse = {coEvery { mockRepository.performTransfer(any()) } returns TransferResponse(result = false) },
             successExpected = false,
             errorExpected = R.string.transfert_failure // Attendre l'erreur d'échec de transfert
         )

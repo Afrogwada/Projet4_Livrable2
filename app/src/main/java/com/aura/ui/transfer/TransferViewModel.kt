@@ -10,11 +10,11 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.stateIn
 
-import com.aura.ui.data.model.TransferRequest
+import com.aura.data.model.TransferRequest
 import kotlinx.coroutines.launch
 import java.io.IOException
 import java.lang.Exception
-import com.aura.ui.data.repository.TransferRepository
+import com.aura.data.repository.TransferRepository
 
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update

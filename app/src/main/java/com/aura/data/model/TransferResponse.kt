@@ -1,4 +1,4 @@
-package com.aura.ui.data.model
+package com.aura.data.model
 
 /**
  * Représente la réponse du serveur après le virement.

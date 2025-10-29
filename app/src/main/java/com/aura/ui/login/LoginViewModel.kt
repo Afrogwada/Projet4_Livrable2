@@ -4,7 +4,7 @@ import com.aura.ui.Logger
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.aura.R
-import com.aura.ui.data.repository.LoginRepository
+import com.aura.data.repository.LoginRepository
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import java.io.IOException

@@ -1,7 +1,7 @@
-package com.aura.ui.data.repository
+package com.aura.data.repository
 
-import com.aura.ui.data.model.AccountResponse
-import com.aura.ui.data.network.RetrofitInstance
+import com.aura.data.model.AccountResponse
+import com.aura.data.network.RetrofitInstance
 
 /**
  * Repository qui encapsule l'accès à l'API pour les comptes.
@@ -17,7 +17,4 @@ class GetAccountsRepository {
     suspend fun getAccounts(userId: String): List<AccountResponse> {
         return RetrofitInstance.getAccounts.getAccounts(userId)
     }
-
-
-
 }

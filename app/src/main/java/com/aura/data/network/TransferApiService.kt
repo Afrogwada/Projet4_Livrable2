@@ -1,7 +1,7 @@
-package com.aura.ui.data.network
+package com.aura.data.network
 
-import com.aura.ui.data.model.TransferRequest
-import com.aura.ui.data.model.TransferResponse
+import com.aura.data.model.TransferRequest
+import com.aura.data.model.TransferResponse
 import retrofit2.http.Body
 import retrofit2.http.POST
 

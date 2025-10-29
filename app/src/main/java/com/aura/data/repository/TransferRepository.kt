@@ -1,8 +1,8 @@
-package com.aura.ui.data.repository
+package com.aura.data.repository
 
-import com.aura.ui.data.model.TransferRequest
-import com.aura.ui.data.model.TransferResponse
-import com.aura.ui.data.network.RetrofitInstance
+import com.aura.data.model.TransferRequest
+import com.aura.data.model.TransferResponse
+import com.aura.data.network.RetrofitInstance
 
 class TransferRepository {
     private val api = RetrofitInstance.transferApi
