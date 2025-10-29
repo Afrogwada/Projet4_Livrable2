@@ -22,81 +22,103 @@ class TransferActivity : AppCompatActivity() {
     const val EXTRA_USER_ID = "com.aura.ui.transfer.SENDER_ID"
   }
 
-  /**
-   * The binding for the transfer layout.
-   */
   private lateinit var binding: ActivityTransferBinding
-
   private val transferViewModel: TransferViewModel by viewModels()
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
+    setupBinding()
+    setupInitialData() // Récupération de l'ID de l'expéditeur
+    setupInputListeners() // Configuration des écouteurs de texte
+    setupTransferButtonListener() // Configuration du bouton de virement
+    observeViewModelFlows() // Observation des StateFlows
+  }
 
+  /**
+   * Configure le View Binding et définit le content view.
+   */
+  private fun setupBinding() {
     binding = ActivityTransferBinding.inflate(layoutInflater)
     setContentView(binding.root)
+  }
 
-    val recipient = binding.recipient
-    val amount = binding.amount
-    val transfer = binding.transfer
-    val loading = binding.loading
-
-    // Récupération de l'ID utilisateur de l'Intent (transmis par HomeActivity)
+  /**
+   * Récupère l'ID de l'expéditeur de l'Intent et le transmet au ViewModel.
+   */
+  private fun setupInitialData() {
     val userId = intent.getStringExtra(EXTRA_USER_ID)
     if (userId != null) {
       transferViewModel.setSenderId(userId)
     }
+    // Si userId est null ici, une gestion d'erreur plus robuste pourrait être nécessaire.
+  }
 
-
-    /**
-     * Configure les listeners
-     */
-
-    transfer.setOnClickListener {
-      loading.visibility = View.VISIBLE
-      transferViewModel.transfer()
-
-    }
-    recipient.doAfterTextChanged { editable ->
+  /**
+   * Configure les écouteurs pour les champs de texte (destinataire et montant).
+   */
+  private fun setupInputListeners() {
+    // Utilisation directe de binding.recipient et binding.amount
+    binding.recipient.doAfterTextChanged { editable ->
       transferViewModel.setRecipient(editable.toString())
     }
-
-    amount.doAfterTextChanged { editable ->
+    binding.amount.doAfterTextChanged { editable ->
       transferViewModel.setAmount(editable.toString())
     }
+  }
 
-    /**
-     * Observe le StateFlow pour activer/désactiver le bouton de virement.
-     */
+  /**
+   * Configure le listener pour le bouton de virement.
+   */
+  private fun setupTransferButtonListener() {
+    // Utilisation directe de binding.transfer
+    binding.transfer.setOnClickListener {
+      // Début du virement (le chargement sera géré par l'observateur de uiState)
+      transferViewModel.transfer()
+    }
+  }
 
+  /**
+   * Démarre l'observation de tous les StateFlows du ViewModel.
+   */
+  private fun observeViewModelFlows() {
+    // Observer le flow pour l'activation du bouton
     lifecycleScope.launch {
       transferViewModel.isTransferButtonEnabled.collectLatest { isEnabled ->
-        // Désactiver/Activer le bouton de virement
-        transfer.isEnabled = isEnabled
+        binding.transfer.isEnabled = isEnabled
       }
     }
-    // ---------------------------------------------------------------------------------------------
-    // NOUVEL OBSERVATEUR UNIQUE DU CONTENEUR D'ÉTAT (uiState)
-    // ---------------------------------------------------------------------------------------------
+
+    // Observer le flow de l'état global de l'UI
     lifecycleScope.launch {
       transferViewModel.uiState.collectLatest { uiState ->
-        // Gérer l'état de chargement
-        loading.visibility = if (uiState.isTransferring) View.VISIBLE else View.GONE
-        //transfer.isEnabled = !uiState.isTransferring // Désactiver le bouton pendant le chargement
-
-        if (uiState.transferSuccess == true) {
-          // Transfert réussie → retour à Home
-          setResult(Activity.RESULT_OK, Intent())
-          finish()
-        }
-        // 3. Gérer l'échec (avec ou sans message d'erreur)
-        else if (uiState.transferSuccess == false && uiState.error != null) {
-          // Afficher le message d'erreur provenant du ViewModel
-          Toast.makeText(this@TransferActivity, getString(uiState.error), Toast.LENGTH_LONG).show()
-        }
+        handleLoadingState(uiState.isTransferring)
+        handleTransferResult(uiState)
       }
     }
   }
+
+  /**
+   * Gère la visibilité de la barre de chargement.
+   */
+  private fun handleLoadingState(isTransferring: Boolean) {
+    binding.loading.visibility = if (isTransferring) View.VISIBLE else View.GONE
+    // Optionnel : Désactiver l'interaction avec le bouton pendant le chargement
+    // binding.transfer.isEnabled = !isTransferring
+  }
+
+  /**
+   * Gère les résultats du virement (succès ou échec).
+   */
+  private fun handleTransferResult(uiState: TransferUiState) {
+    if (uiState.transferSuccess == true) {
+      // Transfert réussie → retour à Home (RESULT_OK)
+      setResult(Activity.RESULT_OK, Intent())
+      finish()
+    }
+    // Gérer l'échec (avec message d'erreur)
+    else if (uiState.transferSuccess == false && uiState.error != null) {
+      // Afficher le message d'erreur provenant du ViewModel
+      Toast.makeText(this, getString(uiState.error), Toast.LENGTH_LONG).show()
+    }
+  }
 }
-
-
-
