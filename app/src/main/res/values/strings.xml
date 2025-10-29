@@ -20,4 +20,5 @@
   <string name="balance_loading">Chargement du solde...</string>
   <string name="amount_invalid">Montant invalide. Veuillez entrer un nombre positif.</string>
   <string name="transfert_failure">Échec du virement. Vérifiez les détails du destinataire ou le solde.</string>
+  <string name="transfer_success">Virement ok.</string>
 </resources>

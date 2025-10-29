@@ -20,8 +20,6 @@ import com.aura.ui.model.formatBalance
 import com.aura.ui.transfer.TransferActivity
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
-import java.text.NumberFormat
-import java.util.Locale
 
 /**
  * The home activity for the app.
@@ -32,134 +30,186 @@ class HomeActivity : AppCompatActivity()
   companion object {
     const val EXTRA_USER_ID = "com.aura.ui.home.USER_ID"
   }
-  /**
-   * The binding for the home layout.
-   */
+
   private lateinit var binding: ActivityHomeBinding
-
-  /** ViewModel associé à cet écran. */
   private val homeViewModel: HomeViewModel by viewModels()
+  private var userId: String? = null
 
-  /**
-   * A callback for the result of starting the TransferActivity.
-   */
+  // ---------------------------------------------------------------------------------------------
+  // Initialisation et Gestion des Résultats d'Activités
+  // ---------------------------------------------------------------------------------------------
+
+  /** Callback pour le résultat de la TransferActivity. */
   private val startTransferActivityForResult =
     registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result: ActivityResult ->
-      // Recharger les comptes après un virement réussi pour mettre à jour le solde
-      if (result.resultCode == Activity.RESULT_OK) {
-        homeViewModel.refresh()
-      }
+      handleTransferActivityResult(result)
     }
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
+    setupBinding()
+    setupInitialData() // Récupère l'ID et démarre le chargement
+    setupListeners()
+    setupBackButtonHandler()
+    observeViewModel()
+  }
 
+  /**
+   * Configure le View Binding et définit le content view.
+   */
+  private fun setupBinding() {
     binding = ActivityHomeBinding.inflate(layoutInflater)
     setContentView(binding.root)
+  }
 
-    val balance = binding.balance
-    val transfer = binding.transfer
-    val loading = binding.loading
-
-    // Récupération de l'ID utilisateur de l'Intent (transmis par LoginActivity)
-    val userId = intent.getStringExtra(EXTRA_USER_ID)
+  /**
+   * Récupère l'ID utilisateur de l'Intent et déclenche le chargement des comptes.
+   * Redirige vers LoginActivity si l'ID est manquant.
+   */
+  private fun setupInitialData() {
+    userId = intent.getStringExtra(EXTRA_USER_ID)
 
     if (!userId.isNullOrBlank()) {
-      // Déclenchement de l'appel API dans le ViewModel
-      homeViewModel.loadUserAccounts(userId)
-      // Solde est initialisé à vide, il sera rempli par l'observation
-      balance.text = ""
+      homeViewModel.loadUserAccounts(userId!!)
+      binding.balance.text = "" // Initialisation
     } else {
-      // Cas d'erreur : ID manquant (ex: redirection vers LoginActivity)
-      startActivity(Intent(this@HomeActivity, LoginActivity::class.java))
-      finish()
+      // Cas d'erreur : ID manquant
+      navigateToLogin()
     }
+  }
 
+  // ---------------------------------------------------------------------------------------------
+  // Listeners et Gestion des Événements
+  // ---------------------------------------------------------------------------------------------
 
-    transfer.setOnClickListener {
-      if (userId != null) {
-        val intent = Intent(this@HomeActivity, TransferActivity::class.java)
-        // 💡 Passer l'ID de l'expéditeur au TransferActivity
-        intent.putExtra(TransferActivity.EXTRA_USER_ID, userId) // Assumer l'existence de la constante dans TransferActivity
-        startTransferActivityForResult.launch(intent)
-      } else {
-        Toast.makeText(this, "Erreur: ID utilisateur manquant.", Toast.LENGTH_SHORT).show()
+  /**
+   * Configure le listener pour le bouton de virement.
+   */
+  private fun setupListeners() {
+    binding.transfer.setOnClickListener {
+      startTransferFlow()
+    }
+  }
+
+  /**
+   * Démarre la TransferActivity, si l'ID utilisateur est disponible.
+   */
+  private fun startTransferFlow() {
+    if (userId != null) {
+      val intent = Intent(this, TransferActivity::class.java).apply {
+        putExtra(TransferActivity.EXTRA_USER_ID, userId)
       }
+      startTransferActivityForResult.launch(intent)
+    } else {
+      Toast.makeText(this, "Erreur: ID utilisateur manquant.", Toast.LENGTH_SHORT).show()
     }
+  }
 
-    /**
-     * Gère l'appui sur le bouton de retour.
-     * Appelle finish() pour fermer la HomeActivity et quitter l'application,
-     * au lieu de naviguer vers l'activité précédente (LoginActivity).
-     */
-    // 💡 MISE EN PLACE DU GESTIONNAIRE DU BOUTON RETOUR MODERNE (OnBackPressedDispatcher)
+  /**
+   * Gère le résultat retourné par la TransferActivity.
+   */
+  private fun handleTransferActivityResult(result: ActivityResult) {
+    // Recharger les comptes après un virement réussi pour mettre à jour le solde
+    if (result.resultCode == Activity.RESULT_OK) {
+      homeViewModel.refresh()
+      // Optionnel: afficher un toast de succès
+      Toast.makeText(this, getString(R.string.transfer_success), Toast.LENGTH_SHORT).show()
+    }
+  }
+
+  /**
+   * Configure le comportement du bouton de retour (Back).
+   */
+  private fun setupBackButtonHandler() {
     onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
       override fun handleOnBackPressed() {
         // L'action est de fermer l'activité (et donc l'application)
         finish()
       }
     })
+  }
 
-    /**
-     * Collecte le HomeUiState du homeViewModel et met à jour l'UI en conséquence.
-     */
+  // ---------------------------------------------------------------------------------------------
+  // Observation des Données (ViewModel)
+  // ---------------------------------------------------------------------------------------------
+
+  /**
+   * Démarre la collecte du HomeUiState du ViewModel.
+   */
+  private fun observeViewModel() {
     lifecycleScope.launch {
       homeViewModel.uiState.collectLatest { state ->
-
-        // Gérer l'état de chargement
-        loading.visibility = if (state.isLoading) View.VISIBLE else View.GONE
-
-        if (state.isLoading) {
-          balance.text = getString(R.string.balance_loading)
-          balance.visibility = View.VISIBLE
-        }
-
-        // 2. Gérer le solde (Succès)
-        if (state.balance != null) {
-          balance.text = state.balance.formatBalance()
-          balance.visibility = View.VISIBLE
-        }
-
-        // 3. Gérer les erreurs
-        if (state.error != null) {
-          balance.visibility = View.GONE
-
-          // Récupérer le message d'erreur à partir de l'ID de ressource
-          val errorMessage = when (state.error) {
-            R.string.error_user_not_found -> getString(
-              R.string.error_user_not_found,
-              homeViewModel.uiState.value.userId
-            )
-
-            else -> getString(state.error)
-          }
-          Toast.makeText(this@HomeActivity, errorMessage, Toast.LENGTH_LONG).show()
-        }
+        handleLoadingState(state.isLoading)
+        handleBalance(state.balance)
+        handleError(state.error)
       }
     }
   }
 
+  /**
+   * Met à jour la visibilité de la barre de chargement et le texte du solde.
+   */
+  private fun handleLoadingState(isLoading: Boolean) {
+    binding.loading.visibility = if (isLoading) View.VISIBLE else View.GONE
+    if (isLoading) {
+      binding.balance.text = getString(R.string.balance_loading)
+      binding.balance.visibility = View.VISIBLE
+    }
+  }
 
+  /**
+   * Met à jour le solde affiché en cas de succès.
+   */
+  private fun handleBalance(balance: Double?) {
+    if (balance != null) {
+      binding.balance.text = balance.formatBalance()
+      binding.balance.visibility = View.VISIBLE
+    }
+  }
 
+  /**
+   * Gère l'affichage d'un message d'erreur si présent dans l'état.
+   */
+  private fun handleError(errorResId: Int?) {
+    if (errorResId != null) {
+      binding.balance.visibility = View.GONE
 
-  override fun onCreateOptionsMenu(menu: Menu?): Boolean
-  {
+      // Construction du message d'erreur spécifique si nécessaire
+      val errorMessage = when (errorResId) {
+        R.string.error_user_not_found -> getString(
+          R.string.error_user_not_found,
+          homeViewModel.uiState.value.userId
+        )
+        else -> getString(errorResId)
+      }
+      Toast.makeText(this@HomeActivity, errorMessage, Toast.LENGTH_LONG).show()
+    }
+  }
+
+  // ---------------------------------------------------------------------------------------------
+  // Menu d'Options
+  // ---------------------------------------------------------------------------------------------
+
+  override fun onCreateOptionsMenu(menu: Menu?): Boolean {
     menuInflater.inflate(R.menu.home_menu, menu)
     return true
   }
 
-  override fun onOptionsItemSelected(item: MenuItem): Boolean
-  {
-    return when (item.itemId)
-    {
-      R.id.disconnect ->
-      {
-        startActivity(Intent(this@HomeActivity, LoginActivity::class.java))
-        finish()
+  override fun onOptionsItemSelected(item: MenuItem): Boolean {
+    return when (item.itemId) {
+      R.id.disconnect -> {
+        navigateToLogin()
         true
       }
-      else            -> super.onOptionsItemSelected(item)
+      else -> super.onOptionsItemSelected(item)
     }
   }
 
+  /**
+   * Navigue vers l'écran de connexion et ferme cette activité.
+   */
+  private fun navigateToLogin() {
+    startActivity(Intent(this@HomeActivity, LoginActivity::class.java))
+    finish()
+  }
 }
